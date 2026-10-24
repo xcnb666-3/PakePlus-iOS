@@ -1,0 +1,1691 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>星城双组</title>
+<style>
+    :root {
+        --bg-primary: #f0f4ff;
+        --bg-surface: #e8eeff;
+        --text-primary: #0e1a33;
+        --text-secondary: #4a5a7a;
+        --text-tertiary: #7a8a9a;
+        --accent: #00d4ff;
+        --accent-gradient: linear-gradient(135deg, #00d4ff, #5b8cff);
+        --success: #34d399;
+        --warning: #ffb84d;
+        --error: #ff6b6b;
+        --gold: #5b8cff;
+        --card-border: rgba(0,140,255,0.3);
+        --card-glow: 0 0 30px rgba(0,140,255,0.1);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+        background:var(--bg-primary);
+        font-family:-apple-system,sans-serif;
+        min-height:100vh;
+        padding:16px 14px 30px;
+        color:var(--text-primary);
+        overflow-x:hidden;
+        position:relative;
+    }
+    #starCanvas{
+        position:fixed;top:0;left:0;width:100%;height:100%;
+        z-index:0;pointer-events:none;opacity:0.5;
+    }
+    .main-container{
+        max-width:560px;margin:0 auto;
+        position:relative;z-index:1;
+    }
+
+    /* ============================================================
+       启动页 Splash
+       ============================================================ */
+    .splash{
+        position:fixed;top:0;left:0;width:100%;height:100vh;height:100dvh;
+        background:radial-gradient(ellipse at 50% 30%,#eaf6ff,#d0e6fa 45%,#e0eef8);
+        z-index:99999;display:flex;align-items:center;justify-content:center;
+        overflow:hidden;
+        transition:opacity .55s ease,transform .55s ease;
+        opacity:1;
+    }
+    .splash.hidden{opacity:0;transform:scale(1.08);pointer-events:none}
+    .splash::before{
+        content:'';position:absolute;inset:-40%;
+        background:
+            radial-gradient(circle at 30% 30%,rgba(0,212,255,.32) 0,transparent 45%),
+            radial-gradient(circle at 70% 70%,rgba(91,140,255,.30) 0,transparent 45%);
+        animation:splashGlow 6s ease-in-out infinite alternate;
+        pointer-events:none;
+    }
+    @keyframes splashGlow{0%{transform:rotate(0deg) scale(1);opacity:.7}100%{transform:rotate(20deg) scale(1.1);opacity:1}}
+    .splash-inner{
+        position:relative;z-index:1;text-align:center;
+        padding:20px 26px;width:100%;max-width:400px;
+        display:flex;flex-direction:column;align-items:center;
+    }
+    .splash-avatar{
+        width:clamp(120px,34vw,150px);
+        height:clamp(120px,34vw,150px);
+        border-radius:50%;
+        position:relative;
+        padding:5px;
+        background:linear-gradient(135deg,#00d4ff,#5b8cff,#7ab8ff);
+        box-shadow:0 12px 36px rgba(0,140,255,.35),0 0 0 8px rgba(255,255,255,.7);
+        animation:splashAvatarIn .95s cubic-bezier(.2,.8,.3,1) .1s both;
+        margin-bottom:22px;
+    }
+    .splash-avatar::after{
+        content:'';position:absolute;inset:-9px;border-radius:50%;
+        border:1px solid rgba(0,180,255,.5);
+        animation:splashRing 2.6s ease-out 1.3s infinite;
+        pointer-events:none;
+    }
+    .splash-avatar img{
+        width:100%;height:100%;border-radius:50%;
+        object-fit:cover;display:block;
+        background:linear-gradient(160deg,#dff3ff,#e0ecff);
+        border:2px solid #fff;
+        animation:splashAvatarFloat 3.6s ease-in-out 1.05s infinite;
+    }
+    .splash-avatar.fallback img{display:none}
+    .splash-avatar.fallback::before{
+        content:'双';
+        position:absolute;inset:5px;border-radius:50%;
+        display:flex;align-items:center;justify-content:center;
+        font-size:clamp(42px,12vw,56px);font-weight:900;
+        color:#07101e;letter-spacing:2px;
+        background:linear-gradient(135deg,#00d4ff,#5b8cff);
+        border:2px solid #fff;
+        text-shadow:0 2px 6px rgba(0,80,150,.3);
+    }
+    @keyframes splashAvatarIn{
+        0%{opacity:0;transform:scale(.55) rotate(-14deg)}
+        60%{opacity:1;transform:scale(1.06) rotate(3deg)}
+        100%{opacity:1;transform:scale(1) rotate(0)}
+    }
+    @keyframes splashAvatarFloat{
+        0%,100%{transform:translateY(0)}
+        50%{transform:translateY(-6px)}
+    }
+    @keyframes splashRing{
+        0%{transform:scale(.92);opacity:.85}
+        100%{transform:scale(1.32);opacity:0}
+    }
+    .splash-title{
+        font-size:clamp(22px,7vw,30px);font-weight:900;letter-spacing:3px;
+        background:linear-gradient(135deg,#00d4ff,#5b8cff);
+        -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+        filter:drop-shadow(0 4px 16px rgba(0,160,255,.25));
+        animation:splashFadeUp .8s ease-out .35s both;
+    }
+    .splash-sub{
+        margin-top:10px;font-size:clamp(11px,3.2vw,13px);color:#4a6a9a;
+        letter-spacing:1.5px;font-weight:600;
+        animation:splashFadeUp .8s ease-out .45s both;
+    }
+    .splash-balls{
+        display:flex;justify-content:center;gap:12px;margin:22px 0 20px;
+        animation:splashFadeUp .8s ease-out .55s both;
+    }
+    .sball{
+        width:16px;height:16px;border-radius:50%;
+        background:linear-gradient(135deg,#00d4ff,#5b8cff);
+        box-shadow:0 0 14px rgba(0,180,255,.5);
+        animation:splashBounce 1.4s ease-in-out infinite;
+    }
+    .sball:nth-child(1){animation-delay:0s}
+    .sball:nth-child(2){animation-delay:.15s;background:linear-gradient(135deg,#5b8cff,#7ab8ff);box-shadow:0 0 14px rgba(91,140,255,.5)}
+    .sball:nth-child(3){animation-delay:.3s}
+    @keyframes splashBounce{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-12px) scale(1.12)}}
+    .splash-loading{
+        animation:splashFadeUp .8s ease-out .6s both;
+        width:100%;max-width:260px;
+    }
+    .splash-bar{
+        width:100%;height:5px;border-radius:3px;
+        background:rgba(0,140,255,.18);overflow:hidden;position:relative;
+    }
+    .splash-fill{
+        height:100%;width:0%;border-radius:3px;
+        background:linear-gradient(90deg,#00d4ff,#5b8cff,#7ab8ff);
+        background-size:200% 100%;
+        transition:width .45s ease;
+        animation:splashShine 2s linear infinite;
+    }
+    @keyframes splashShine{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+    .splash-text{
+        margin-top:10px;font-size:11px;color:#6a8aae;font-weight:700;
+        letter-spacing:1.5px;font-variant-numeric:tabular-nums;
+        min-height:14px;text-align:center;
+    }
+    .splash-enter{
+        display:flex;align-items:center;justify-content:center;gap:14px;
+        margin-top:28px;padding:12px 0;
+        background:none;border:none;cursor:pointer;
+        width:100%;max-width:280px;
+        font-family:inherit;
+        animation:splashFadeUp .8s ease-out .7s both;
+        transition:opacity .3s,transform .2s;
+        -webkit-tap-highlight-color:transparent;
+    }
+    .splash-enter:disabled{cursor:wait;opacity:.5}
+    .splash-enter:not(:disabled):active{transform:scale(.96)}
+    .splash-enter-line{
+        flex:1;height:1px;
+        background:linear-gradient(90deg,transparent,rgba(0,180,255,.6),transparent);
+        position:relative;overflow:hidden;
+    }
+    .splash-enter-line::after{
+        content:'';position:absolute;top:-1px;left:-30%;width:30%;height:3px;border-radius:2px;
+        background:linear-gradient(90deg,transparent,#00d4ff,transparent);
+        opacity:0;
+        transition:opacity .3s;
+    }
+    .splash-enter:not(:disabled) .splash-enter-line::after{
+        opacity:1;
+        animation:lineShine 2.2s ease-in-out infinite;
+    }
+    .splash-enter-line:last-child::after{
+        animation-direction:reverse;
+    }
+    @keyframes lineShine{0%{left:-30%}100%{left:100%}}
+    .splash-enter-text{
+        font-size:13px;font-weight:800;letter-spacing:3px;
+        color:#3a7bdf;white-space:nowrap;
+        transition:all .3s;
+    }
+    .splash-enter:not(:disabled) .splash-enter-text{
+        animation:pulseEnter 1.7s ease-in-out infinite;
+        color:#00a8e0;
+    }
+    @keyframes pulseEnter{
+        0%,100%{opacity:.8;text-shadow:0 0 6px rgba(0,180,255,.3)}
+        50%{opacity:1;text-shadow:0 0 18px rgba(0,200,255,.75)}
+    }
+    .splash-footer{
+        margin-top:22px;font-size:10px;color:#7a8aa8;letter-spacing:1px;font-weight:600;
+        animation:splashFadeUp .8s ease-out .8s both;
+    }
+    @keyframes splashFadeUp{0%{opacity:0;transform:translateY(14px)}100%{opacity:1;transform:translateY(0)}}
+
+    /* ===== 密码验证 ===== */
+    .pwd-panel{
+        width:100%;max-width:300px;margin-top:26px;
+        display:none;flex-direction:column;align-items:center;gap:16px;
+        animation:splashFadeUp .5s ease-out both;
+    }
+    .pwd-panel.show{display:flex}
+    .pwd-label{
+        font-size:12px;font-weight:800;letter-spacing:3px;color:#4a6a9a;
+    }
+    .pwd-dots{display:flex;gap:12px}
+    .pwd-dot{
+        width:14px;height:14px;border-radius:50%;
+        background:rgba(0,140,255,.18);
+        border:1.5px solid rgba(0,160,255,.5);
+        transition:all .18s ease;
+    }
+    .pwd-dot.on{
+        background:linear-gradient(135deg,#00d4ff,#5b8cff);
+        box-shadow:0 0 12px rgba(0,200,255,.7);
+        transform:scale(1.25);
+    }
+    .pwd-hint{
+        font-size:11px;color:#e05555;font-weight:700;letter-spacing:.5px;
+        min-height:14px;text-align:center;
+    }
+    .pwd-keypad{
+        display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+        width:100%;max-width:230px;
+    }
+    .pwd-key{
+        aspect-ratio:1/1;
+        border:none;border-radius:16px;
+        background:rgba(255,255,255,.72);
+        border:1px solid rgba(0,160,255,.35);
+        font-family:inherit;font-size:20px;font-weight:800;color:#0e1a33;
+        cursor:pointer;transition:.15s;
+        box-shadow:0 3px 10px rgba(0,80,180,.1);
+        -webkit-tap-highlight-color:transparent;
+    }
+    .pwd-key:active{transform:scale(.92);background:#dff3ff}
+    .pwd-key.ok{background:linear-gradient(135deg,#00d4ff,#5b8cff);color:#07101e}
+    .pwd-key.del{background:rgba(255,107,107,.14);color:#e05555;font-size:16px}
+    .pwd-key:disabled,.pwd-key.disabled{opacity:.35;cursor:not-allowed;transform:none}
+    .pwd-lock{
+        font-size:11px;color:#7a8aa8;font-weight:700;letter-spacing:1px;min-height:14px;
+    }
+    @keyframes pwdShake{
+        0%,100%{transform:translateX(0)}
+        20%,60%{transform:translateX(-7px)}
+        40%,80%{transform:translateX(7px)}
+    }
+    .pwd-panel.shake{animation:pwdShake .42s ease}
+
+    @media (orientation: landscape) and (max-height: 520px) {
+        .splash-avatar{width:88px;height:88px;margin-bottom:12px}
+        .splash-balls{margin:12px 0 10px}
+        .splash-enter{margin-top:16px;padding:8px 0}
+        .splash-footer{margin-top:12px}
+        .splash-title{font-size:22px}
+        .pwd-panel{margin-top:14px;gap:12px}
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .splash, .splash::before, .splash-avatar, .splash-avatar img, .splash-avatar::after,
+        .splash-title, .splash-sub, .splash-balls, .sball, .splash-loading, .splash-fill,
+        .splash-enter, .splash-footer, .pwd-panel {
+            animation: none !important;
+            transition: opacity .2s ease !important;
+        }
+    }
+
+    /* ===== 旺旺栏 ===== */
+    .wangwang-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px 18px;
+        background: var(--accent-gradient);
+        border-radius: 24px;
+        padding: 11px 16px;
+        margin-bottom: 14px;
+        color: #07101e;
+        font-size: 15px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        box-shadow: 0 4px 20px rgba(0,160,255,0.35);
+        position: relative;
+        overflow: hidden;
+        animation: wwGlowLight 2.4s ease-in-out infinite;
+        border: 1px solid rgba(0,180,255,0.5);
+    }
+    .wangwang-bar .ww-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .wangwang-bar .qq-icon {
+        font-size: 15px;
+        line-height: 1;
+        filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
+    }
+    .wangwang-bar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -60%;
+        width: 60%;
+        height: 100%;
+        background: linear-gradient(100deg, transparent, rgba(255,255,255,0.5), transparent);
+        animation: wwShineLight 2.8s linear infinite;
+    }
+    .wangwang-bar .ww-icon {
+        font-size: 15px;
+        line-height: 1;
+        filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
+    }
+    .wangwang-bar .ww-num {
+        font-variant-numeric: tabular-nums;
+    }
+    @keyframes wwShineLight {
+        0% { left: -60%; }
+        100% { left: 130%; }
+    }
+    @keyframes wwGlowLight {
+        0%, 100% { box-shadow: 0 4px 20px rgba(0,160,255,0.35); }
+        50% { box-shadow: 0 4px 28px rgba(0,160,255,0.55); }
+    }
+
+    .nav-bar{
+        display:flex;align-items:center;justify-content:space-between;
+        margin-bottom:14px;padding:12px 16px;
+        background:var(--bg-surface);border-radius:24px;
+        box-shadow:0 4px 20px rgba(0,0,0,0.08);
+        border:1px solid var(--card-border);
+        position:relative;z-index:1;
+    }
+    .nav-logo{display:flex;align-items:center;gap:10px}
+    .logo-icon{
+        width:44px;height:44px;
+        background:var(--accent-gradient);
+        border-radius:22px;display:flex;align-items:center;justify-content:center;
+        font-size:26px;animation: logoPulse 2s ease-in-out infinite;
+        box-shadow:0 0 20px rgba(0,180,255,0.4);
+    }
+    @keyframes logoPulse{
+        0%,100%{box-shadow:0 0 20px rgba(0,180,255,0.4);}
+        50%{box-shadow:0 0 35px rgba(0,180,255,0.7);}
+    }
+    .brand-name{
+        font-size:clamp(15px,5.4vw,22px);font-weight:800;
+        background:linear-gradient(135deg,#00d4ff,#5b8cff,#7ab8ff);
+        -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+        letter-spacing:0.5px;white-space:nowrap;
+    }
+
+    .status-card{
+        background:var(--bg-surface);border-radius:20px;padding:14px 16px;
+        margin-bottom:14px;display:flex;gap:18px;flex-wrap:wrap;
+        border:1px solid var(--card-border);z-index:1;position:relative;
+    }
+    .status-item{text-align:left;flex:1;min-width:60px}
+    .status-label{font-size:11px;color:var(--text-secondary);margin-bottom:4px}
+    .status-value{font-size:14px;font-weight:700;color:#3a7bdf}
+
+    .scan-card{
+        background:var(--bg-surface);border-radius:24px;padding:18px;
+        margin-bottom:16px;border:1px solid var(--card-border);
+        box-shadow:0 4px 24px rgba(0,0,0,0.08);
+        position:relative;z-index:1;
+    }
+    .scan-header{
+        display:flex;justify-content:space-between;align-items:center;
+        margin-bottom:12px;
+    }
+    .scan-header h3{
+        font-size:16px;font-weight:800;
+        background:linear-gradient(135deg,#00a8e0,#3a7bdf);
+        -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+        letter-spacing:0.5px;
+    }
+    .scan-range{
+        font-size:11px;color:#3a7bdf;font-weight:700;
+        background:rgba(0,140,255,0.1);
+        padding:4px 10px;border-radius:10px;
+        border:1px solid rgba(0,140,255,0.2);
+    }
+    .scan-progress-wrap{
+        width:100%;height:8px;
+        background:rgba(0,140,255,0.1);
+        border-radius:4px;overflow:hidden;
+        margin-bottom:10px;
+    }
+    .scan-progress{
+        height:100%;width:0%;
+        background:var(--accent-gradient);
+        border-radius:4px;
+        transition:width 0.15s linear;
+    }
+    .scan-status{
+        font-size:12px;color:var(--text-secondary);
+        margin-bottom:12px;text-align:center;
+        min-height:16px;letter-spacing:0.3px;
+    }
+    .btn-scan{
+        width:100%;
+        background:var(--accent-gradient);
+        border:none;padding:12px;border-radius:30px;
+        font-size:14px;font-weight:700;color:#07101e;
+        cursor:pointer;
+        box-shadow:0 3px 15px rgba(0,160,255,0.25);
+        transition:0.3s;letter-spacing:0.5px;
+    }
+    .btn-scan:active{transform:scale(0.97);}
+    .btn-scan:disabled{
+        opacity:0.6;cursor:not-allowed;
+        box-shadow:none;
+    }
+    .scan-results{
+        margin-top:14px;
+        display:none;
+    }
+    .scan-results.show{display:block;animation:fadeInUp 0.4s ease-out;}
+
+    .scan-toggle{
+        display:flex;align-items:center;justify-content:center;gap:6px;
+        width:100%;padding:10px;
+        background:rgba(0,140,255,0.06);
+        border:1px dashed rgba(0,140,255,0.3);
+        border-radius:12px;
+        font-size:12px;font-weight:700;color:#3a7bdf;
+        cursor:pointer;margin-bottom:10px;
+        transition:0.2s;letter-spacing:0.5px;
+        user-select:none;
+    }
+    .scan-toggle:hover{background:rgba(0,140,255,0.12);border-color:rgba(0,140,255,0.5);}
+    .scan-toggle .arrow{
+        display:inline-block;
+        transition:transform 0.3s ease;
+        font-size:10px;
+    }
+    .scan-toggle.collapsed .arrow{transform:rotate(-90deg);}
+
+    .scan-list{
+        overflow:hidden;
+        transition:max-height 0.35s ease, opacity 0.3s ease;
+        max-height:600px;opacity:1;
+    }
+    .scan-list.collapsed{
+        max-height:0;opacity:0;
+    }
+
+    .scan-results-title{
+        font-size:13px;font-weight:800;color:#3a7bdf;
+        margin-bottom:10px;text-align:center;
+        letter-spacing:1px;
+    }
+    .scan-result-item{
+        display:flex;align-items:center;justify-content:space-between;
+        padding:10px 12px;border-radius:12px;
+        background:rgba(0,140,255,0.05);
+        margin-bottom:8px;
+        border:1px solid rgba(0,180,255,0.15);
+        font-size:13px;
+        transition:0.2s;
+        cursor:pointer;
+    }
+    .scan-result-item:hover{
+        background:rgba(0,140,255,0.1);
+        transform:translateX(2px);
+    }
+    .scan-result-item.top1{
+        background:linear-gradient(135deg,rgba(0,180,255,0.15),rgba(90,140,255,0.1));
+        border-color:rgba(0,180,255,0.5);
+        box-shadow:0 0 15px rgba(0,180,255,0.15);
+    }
+    .scan-result-item.active{
+        outline:2px solid #00a8e0;
+    }
+    .scan-rank{
+        width:28px;height:28px;border-radius:50%;
+        background:var(--accent-gradient);
+        color:#07101e;
+        display:flex;align-items:center;justify-content:center;
+        font-weight:900;font-size:13px;
+        flex-shrink:0;
+    }
+    .scan-result-item:not(.top1) .scan-rank{
+        background:rgba(0,140,255,0.15);
+        color:#3a7bdf;
+    }
+    .scan-offset{
+        font-weight:700;color:var(--text-primary);
+        font-size:13px;flex:1;text-align:center;
+        letter-spacing:0.3px;
+        font-family:-apple-system,"SF Mono",Menlo,monospace;
+    }
+    .scan-hits{
+        font-weight:800;color:#3a7bdf;
+        font-size:13px;text-align:right;
+        flex-shrink:0;min-width:80px;
+    }
+    .scan-hits small{
+        font-weight:500;color:var(--text-tertiary);
+        font-size:10px;margin-left:2px;
+    }
+    .scan-tip{
+        text-align:center;font-size:11px;color:var(--text-tertiary);
+        margin-top:8px;letter-spacing:0.3px;
+    }
+
+    .hero-card{
+        background:var(--bg-surface);border-radius:24px;padding:20px;
+        margin-bottom:16px;border:1px solid var(--card-border);
+        position:relative;z-index:1;
+        box-shadow:0 4px 24px rgba(0,0,0,0.08);
+    }
+    .hero-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .hero-live{
+        background:rgba(255,90,90,0.15);padding:4px 10px;border-radius:20px;
+        font-size:11px;font-weight:600;color:#e05555;
+        animation: livePulse 1.5s ease-in-out infinite;
+    }
+    @keyframes livePulse{0%,100%{opacity:1}50%{opacity:0.5}}
+    .hero-balls{display:flex;gap:12px;margin-bottom:16px;justify-content:center}
+    .ball{
+        width:62px;height:62px;border-radius:50%;
+        display:flex;align-items:center;justify-content:center;
+        font-size:28px;font-weight:900;color:#0e1a33;
+        background:radial-gradient(circle at 35% 35%,#ffffff,#d8e6ff);
+        box-shadow:0 6px 20px rgba(0,0,0,0.15),inset 0 -2px 4px rgba(0,0,0,0.05);
+        border:2px solid #b8d4ff;
+    }
+    .period{font-size:24px;font-weight:800;color:#3a7bdf;margin-bottom:6px}
+    .sum{font-size:13px;color:var(--text-secondary)}
+    .countdown{
+        margin-top:14px;padding:10px 16px;
+        background:rgba(0,180,255,0.1);border-radius:30px;
+        font-weight:700;color:#0099c8;display:inline-block;font-size:15px;
+        border:1px solid rgba(0,180,255,0.2);
+    }
+    .predict-card{
+        background:var(--bg-surface);border-radius:24px;padding:20px;
+        margin-bottom:16px;border:1px solid var(--card-border);
+        position:relative;z-index:1;
+        box-shadow:0 4px 24px rgba(0,0,0,0.08);
+    }
+    .card-header{
+        display:flex;justify-content:space-between;align-items:center;
+        margin-bottom:16px;flex-wrap:wrap;gap:8px;
+    }
+    .card-header h3{
+        font-size:20px;font-weight:700;
+        background:linear-gradient(135deg,#00a8e0,#3a7bdf);
+        -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    }
+    .btn-group{display:flex;gap:8px;flex-wrap:wrap}
+    .btn-generate{
+        background:var(--accent-gradient);border:none;padding:10px 16px;
+        border-radius:30px;font-size:13px;font-weight:700;color:#07101e;
+        cursor:pointer;box-shadow:0 3px 15px rgba(0,160,255,0.25);
+        white-space:nowrap;transition:0.3s;letter-spacing:0.5px;
+    }
+    .btn-generate:active{transform:scale(0.94)}
+    .btn-gold{
+        background:linear-gradient(135deg,#5b8cff,#7ab8ff);color:#07101e;
+    }
+    .btn-gold.is-locked{
+        background:linear-gradient(135deg,#ffb84d,#ff8a5b);
+        color:#2a1500;
+        box-shadow:0 3px 15px rgba(255,140,60,0.4);
+    }
+    .predict-grid{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:10px;
+        margin-bottom:14px;
+    }
+    .predict-cell{
+        position:relative;
+        display:flex;flex-direction:column;align-items:center;justify-content:center;
+        text-align:center;
+        padding:18px 10px 16px;
+        border-radius:16px;
+        background:rgba(0,140,255,0.03);
+        border:1px solid rgba(0,180,255,0.25);
+        transition:transform .25s,box-shadow .25s,border-color .25s;
+        min-height:130px;
+    }
+    .predict-cell:hover{
+        transform:translateY(-3px);
+        box-shadow:0 6px 24px rgba(0,160,255,0.15);
+        border-color:rgba(0,180,255,0.5);
+    }
+    .predict-cell.is-primary{
+        background:linear-gradient(160deg,rgba(0,160,255,0.12),rgba(60,120,255,0.06));
+        border:2px solid rgba(0,180,255,0.55);
+        box-shadow:0 0 18px rgba(0,180,255,0.18);
+    }
+    .predict-cell.is-primary .cell-value{
+        color:#3a7bdf;
+        font-size:30px;
+        text-shadow:0 0 12px rgba(100,180,255,0.45);
+    }
+    .cell-icon{font-size:22px;margin:14px 0 4px;line-height:1}
+    .cell-value{
+        font-size:26px;font-weight:900;color:#3a7bdf;
+        letter-spacing:1px;line-height:1.15;word-break:break-all;
+        animation:fadeInUp .4s ease-out;
+    }
+    @keyframes fadeInUp{
+        from{opacity:0;transform:translateY(8px);}
+        to{opacity:1;transform:translateY(0);}
+    }
+    .kill-banner{
+        display:flex;align-items:center;justify-content:center;gap:10px;
+        flex-wrap:wrap;
+        padding:12px 16px;border-radius:14px;
+        background:linear-gradient(90deg,rgba(0,140,255,0.08),rgba(0,180,255,0.15),rgba(0,140,255,0.08));
+        border:1px solid rgba(0,180,255,0.35);
+        margin-bottom:12px;
+        text-align:center;
+    }
+    .kill-banner-label{
+        font-size:13px;font-weight:800;color:#3a7bdf;letter-spacing:1px;
+    }
+    .kill-banner-value{
+        font-size:24px;font-weight:900;color:#3a7bdf;letter-spacing:2px;
+    }
+
+    .history-card{
+        background:var(--bg-surface);border-radius:24px;padding:18px;
+        margin-bottom:16px;border:1px solid var(--card-border);
+        position:relative;z-index:1;
+        box-shadow:0 4px 24px rgba(0,0,0,0.08);
+    }
+    .history-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+    .history-title{font-size:18px;font-weight:700;color:var(--text-primary)}
+    .historyRate{font-size:12px;color:var(--text-secondary)}
+    .table-wrapper{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:12px}
+    th{
+        background:var(--bg-primary);padding:10px 6px;font-weight:600;
+        color:var(--text-secondary);border-bottom:1px solid rgba(0,180,255,0.2);
+        text-align:center;white-space:nowrap;
+    }
+    td{
+        padding:8px 6px;border-bottom:1px solid rgba(0,0,0,0.05);
+        white-space:nowrap;color:var(--text-primary);text-align:center;
+    }
+    .correct{color:var(--success)!important;font-weight:700}
+    .wrong{color:var(--error)!important;font-weight:700}
+
+    .footer{
+        text-align:left;padding:14px;font-size:11px;
+        color:var(--text-tertiary);position:relative;z-index:1;
+    }
+    .toast{
+        position:fixed;top:20px;left:50%;transform:translateX(-50%);
+        background:linear-gradient(135deg,#e8eeff,#d8e4ff);color:#3a7bdf;
+        padding:12px 24px;border-radius:30px;font-size:13px;font-weight:700;
+        z-index:999;opacity:0;transition:opacity 0.3s;
+        border:1px solid rgba(0,180,255,0.5);
+        box-shadow:0 8px 30px rgba(0,80,180,0.2);
+        pointer-events:none;max-width:90vw;text-align:center;
+    }
+    .toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     启动页 Splash
+     ============================================================ -->
+<div class="splash" id="splash">
+    <div class="splash-inner">
+
+        <div class="splash-avatar" id="splashAvatar">
+            <img src="http://154.222.24.190:3003/lj-0f03800.jpeg"
+                 alt="星城双组"
+                 onerror="document.getElementById('splashAvatar').classList.add('fallback')">
+        </div>
+
+        <div class="splash-title">星城双组</div>
+        <div class="splash-sub">双组精准 · 智能扫描 · 核心 v2</div>
+
+        <div class="splash-balls">
+            <span class="sball"></span>
+            <span class="sball"></span>
+            <span class="sball"></span>
+        </div>
+
+        <div class="splash-loading" id="pwdLoad" style="display:none;">
+            <div class="splash-bar"><div class="splash-fill" id="splashFill"></div></div>
+            <div class="splash-text" id="splashText">正在启动引擎…</div>
+        </div>
+
+        <button class="splash-enter" id="splashEnter" disabled>
+            <span class="splash-enter-line"></span>
+            <span class="splash-enter-text" id="splashEnterText">正在准备…</span>
+            <span class="splash-enter-line"></span>
+        </button>
+
+        <!-- ★ 密码面板（10 组密码，纯 7 位数字） -->
+        <div class="pwd-panel" id="pwdPanel">
+            <div class="pwd-label">请输入 7 位访问码</div>
+            <div class="pwd-dots" id="pwdDots">
+                <span class="pwd-dot"></span><span class="pwd-dot"></span><span class="pwd-dot"></span>
+                <span class="pwd-dot"></span><span class="pwd-dot"></span><span class="pwd-dot"></span>
+                <span class="pwd-dot"></span>
+            </div>
+            <div class="pwd-hint" id="pwdHint"></div>
+            <div class="pwd-keypad" id="pwdKeypad">
+                <button class="pwd-key" data-k="1">1</button>
+                <button class="pwd-key" data-k="2">2</button>
+                <button class="pwd-key" data-k="3">3</button>
+                <button class="pwd-key" data-k="4">4</button>
+                <button class="pwd-key" data-k="5">5</button>
+                <button class="pwd-key" data-k="6">6</button>
+                <button class="pwd-key" data-k="7">7</button>
+                <button class="pwd-key" data-k="8">8</button>
+                <button class="pwd-key" data-k="9">9</button>
+                <button class="pwd-key del" data-k="del">⌫</button>
+                <button class="pwd-key" data-k="0">0</button>
+                <button class="pwd-key ok" data-k="ok">✓</button>
+            </div>
+            <div class="pwd-lock" id="pwdLock"></div>
+        </div>
+
+        <div class="splash-footer" id="splashFooter">旺旺 543026280 · QQ 3995248105</div>
+    </div>
+</div>
+
+<canvas id="starCanvas"></canvas>
+<div class="toast" id="toast"></div>
+<div class="main-container">
+
+    <div class="wangwang-bar">
+        <span class="ww-item"><span class="ww-icon">🐾</span>旺旺 <span class="ww-num">543026280</span></span>
+        <span class="ww-item"><span class="qq-icon">💬</span>QQ <span class="ww-num">3995248105</span></span>
+    </div>
+
+    <div class="nav-bar">
+        <div class="nav-logo">
+            <div class="logo-icon">🔍</div>
+            <div class="logo-text">
+                <h1 class="brand-name">星城双组</h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-card">
+        <div class="status-item">
+            <div class="status-label">当前期号</div>
+            <div class="status-value" id="statusPeriod">--</div>
+        </div>
+        <div class="status-item">
+            <div class="status-label">开奖和值</div>
+            <div class="status-value" id="statusSum">--</div>
+        </div>
+        <div class="status-item">
+            <div class="status-label">实际类型</div>
+            <div class="status-value" id="statusActual">--</div>
+        </div>
+        <div class="status-item">
+            <div class="status-label">命中状态</div>
+            <div class="status-value" id="statusHit">--</div>
+        </div>
+    </div>
+
+    <div class="scan-card">
+        <div class="scan-header">
+            <h3>🔍 全区间扫描 · 81 万</h3>
+            <span class="scan-range" id="scanRangeLabel">0 ~ 809,999</span>
+        </div>
+        <div class="scan-progress-wrap">
+            <div class="scan-progress" id="scanProgress"></div>
+        </div>
+        <div class="scan-status" id="scanStatus">点击下方按钮开始全区间扫描</div>
+        <button class="btn-scan" id="btnScan">🚀 开始扫描 81 万区间</button>
+        <div class="scan-results" id="scanResults">
+            <div class="scan-toggle" id="scanToggle">
+                <span>🏆 TOP 5 最优区间</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="scan-list" id="scanList"></div>
+        </div>
+        <div class="scan-tip" id="scanTip" style="display:none;">💡 点击结果可直接应用该区间</div>
+    </div>
+
+    <div class="hero-card">
+        <div class="hero-header">
+            <div class="period" id="heroPeriod">第 -- 期</div>
+            <div class="hero-live">● 开奖中</div>
+        </div>
+        <div class="hero-balls" id="heroBalls"></div>
+        <div class="sum" id="heroSum">和值：--</div>
+        <div class="countdown" id="heroCountdown">距下期开奖 -- 秒</div>
+    </div>
+
+    <div class="predict-card">
+        <div class="card-header">
+            <h3>下期预测</h3>
+            <div class="btn-group">
+                <button class="btn-generate" id="btnGenerate">刷新预测</button>
+                <button class="btn-generate btn-gold" id="btnLock">锁定区间</button>
+            </div>
+        </div>
+
+        <div class="predict-grid" id="predictGrid">
+            <div class="predict-cell is-primary" data-role="keep">
+                <div class="cell-icon">💎</div>
+                <div class="cell-value" id="keepVal0">--</div>
+            </div>
+            <div class="predict-cell is-primary" data-role="keep">
+                <div class="cell-icon">💎</div>
+                <div class="cell-value" id="keepVal1">--</div>
+            </div>
+        </div>
+
+        <div class="kill-banner">
+            <span class="kill-banner-label">本期杀组</span>
+            <span class="kill-banner-value" id="killBannerValue">--</span>
+        </div>
+    </div>
+
+    <div class="history-card">
+        <div class="history-header">
+            <div class="history-title">📊 近30期回测记录</div>
+            <div class="historyRate" id="historyRate">命中率 --</div>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>期号</th>
+                        <th>杀组</th>
+                        <th>预测双组</th>
+                        <th>实际开奖</th>
+                    </tr>
+                </thead>
+                <tbody id="historyBody">
+                    <tr><td colspan="4" style="text-align:center;color:var(--text-tertiary)">请先扫描 81 万区间</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="footer">
+        ⚠️ 本预测仅供参考，不构成任何投注建议。请理性看待。
+    </div>
+</div>
+
+<script>
+/* ============================================================
+ *  密码组验证 + 启动页控制
+ *  格式：编号|7位密码|角色  （角色 admin / user，可省略，默认 user）
+ * ============================================================ */
+const ACCESS_CODES = [
+    '01|7391042|admin',
+    '02|2846051|user',
+    '03|9173506|user',
+    '04|5502719|user',
+    '05|1368942|user',
+    '06|8024173|user',
+    '07|4759086|user',
+    '08|6231805|user',
+    '09|3985620|user',
+    '10|1647398|user'
+];
+
+const _codeMap = new Map();
+ACCESS_CODES.forEach(entry => {
+    const [no, code, role = 'user'] = String(entry).split('|');
+    if (!/^\d{7}$/.test(code)) return;
+    _codeMap.set(code, { no: String(no).padStart(2, '0'), role });
+});
+
+const PWD_LEN = 7;
+const MAX_FAIL = 5;
+const LOCK_SEC = 60;
+
+let inputBuf = '';
+let failCount = 0;
+let lockDeadline = 0;
+let lockTimer = null;
+let authedRole = null;
+
+const pwdPanel    = document.getElementById('pwdPanel');
+const pwdLoad     = document.getElementById('pwdLoad');
+const splashEnter = document.getElementById('splashEnter');
+const splashFooter= document.getElementById('splashFooter');
+
+function paintDots(){
+    const dots = document.querySelectorAll('#pwdDots .pwd-dot');
+    dots.forEach((d,i)=> d.classList.toggle('on', i < inputBuf.length));
+}
+function pwdShake(){
+    pwdPanel.classList.remove('shake');
+    void pwdPanel.offsetWidth;
+    pwdPanel.classList.add('shake');
+}
+function setLocked(sec){
+    lockDeadline = Date.now() + sec * 1000;
+    const box = document.getElementById('pwdLock');
+    const keys = document.querySelectorAll('.pwd-key');
+    keys.forEach(k=> k.classList.add('disabled'));
+    clearInterval(lockTimer);
+    const tick = ()=>{
+        const left = Math.max(0, Math.ceil((lockDeadline - Date.now()) / 1000));
+        if(left <= 0){
+            clearInterval(lockTimer);
+            box.textContent = '';
+            failCount = 0;
+            keys.forEach(k=> k.classList.remove('disabled'));
+            document.getElementById('pwdHint').textContent = '';
+            return;
+        }
+        box.textContent = `已锁定，请 ${left} 秒后再试`;
+    };
+    tick(); lockTimer = setInterval(tick, 500);
+}
+function pwdHint(msg){ document.getElementById('pwdHint').textContent = msg; }
+
+function pushKey(k){
+    if(Date.now() < lockDeadline) return;
+    if(k === 'del'){
+        inputBuf = inputBuf.slice(0, -1);
+        pwdHint(''); paintDots(); return;
+    }
+    if(k === 'ok'){ checkCode(); return; }
+    if(inputBuf.length >= PWD_LEN) return;
+    inputBuf += k; paintDots();
+    if(inputBuf.length === PWD_LEN) setTimeout(checkCode, 120);
+}
+
+function checkCode(){
+    if(inputBuf.length < PWD_LEN){
+        pwdHint(`还需 ${PWD_LEN - inputBuf.length} 位`);
+        pwdShake(); return;
+    }
+
+    const matched = _codeMap.get(inputBuf);
+    if(matched){
+        authedRole = matched.role;
+        pwdPanel.style.display = 'none';
+        pwdLoad.style.display = 'block';
+        if(splashFooter){
+            splashFooter.textContent = authedRole === 'admin'
+                ? `✓ 管理员通道 · 编号 ${matched.no}`
+                : `✓ 已授权 · 编号 ${matched.no}`;
+        }
+        advanceSplash(2);
+        setEnterReady();
+    } else {
+        failCount++;
+        inputBuf = ''; paintDots(); pwdShake();
+        if(failCount >= MAX_FAIL){
+            pwdHint(`密码错误 · 已锁定 ${LOCK_SEC} 秒`);
+            setLocked(LOCK_SEC);
+        } else {
+            pwdHint(`密码错误 · 剩余 ${MAX_FAIL - failCount} 次机会`);
+        }
+    }
+}
+
+document.getElementById('pwdKeypad').addEventListener('click', e=>{
+    const b = e.target.closest('.pwd-key');
+    if(!b || b.disabled || b.classList.contains('disabled')) return;
+    pushKey(b.dataset.k);
+});
+document.addEventListener('keydown', e=>{
+    if(pwdPanel.style.display !== 'flex') return;
+    if(/^\d$/.test(e.key)) pushKey(e.key);
+    else if(e.key === 'Backspace') pushKey('del');
+    else if(e.key === 'Enter') checkCode();
+});
+
+/* ---------- 启动进度 ---------- */
+let splashHidden = false;
+let splashStep = 0;
+let splashStepTimer = null;
+
+function advanceSplash(step){
+    splashStep = step;
+    const fill = document.getElementById('splashFill');
+    const text = document.getElementById('splashText');
+    const steps = ['正在启动引擎…','加载历史数据…','初始化双组算法…','准备就绪 ✦'];
+    if(text && steps[step]) text.textContent = steps[step];
+    if(fill) fill.style.width = ((step / (steps.length - 1)) * 100) + '%';
+}
+
+splashStepTimer = setInterval(function(){
+    if(splashStep >= 3 || pwdPanel.style.display === 'flex') return;
+    advanceSplash(splashStep + 1);
+}, 450);
+
+function setEnterReady(){
+    advanceSplash(3);
+    if(splashEnter) splashEnter.disabled = false;
+    const txt = document.getElementById('splashEnterText');
+    if(txt) txt.textContent = '点 击 进 入';
+}
+
+function hideSplash(){
+    if(splashHidden) return;
+    splashHidden = true;
+    if(splashStepTimer){ clearInterval(splashStepTimer); splashStepTimer = null; }
+    advanceSplash(3);
+    const sp = document.getElementById('splash');
+    if(!sp) return;
+    const av = document.getElementById('splashAvatar');
+    if(av){
+        av.style.transition = 'opacity .4s ease, transform .4s ease';
+        av.style.opacity = '0'; av.style.transform = 'scale(.85)';
+    }
+    sp.classList.add('hidden');
+    setTimeout(function(){
+        if(sp.parentNode) sp.parentNode.removeChild(sp);
+    }, 700);
+}
+
+(function bindEnter(){
+    if(!splashEnter) return;
+    splashEnter.addEventListener('click', function(){
+        if(this.disabled) return;
+        hideSplash();
+    });
+})();
+
+function armPasswordGate(){
+    pwdLoad.style.display = 'none';
+    if(splashFooter) splashFooter.style.display = 'none';
+    pwdPanel.classList.remove('shake');
+    pwdPanel.style.display = 'flex';
+    inputBuf = ''; authedRole = null;
+    paintDots(); pwdHint('');
+}
+</script>
+
+<script>
+/* ============================================================
+ *  统一核心算法 v2
+ * ============================================================ */
+const TYPE_NAMES = ['小双', '小单', '大双', '大单'];
+
+function mix32(x) {
+    x = x | 0;
+    x = Math.imul(x ^ (x >>> 16), 0x21F0AAAD);
+    x = Math.imul(x ^ (x >>> 15), 0x735A2D97);
+    x ^= x >>> 15;
+    return x | 0;
+}
+
+function sumToTypeIndex(sum) {
+    return (sum < 14 ? 0 : 2) | (sum & 1);
+}
+function sumToType(sum) {
+    return TYPE_NAMES[sumToTypeIndex(sum)];
+}
+function isSpecialHit(sum) {
+    return sum === 13 || sum === 14;
+}
+
+const _quadBuf = new Int8Array(4);
+const _randBuf = new Uint32Array(4);
+
+function deriveQuad(seedWord, period, sum) {
+    let h = (seedWord | 0) ^ 0x9E3779B9;
+    h = mix32(h ^ Math.imul(period | 0, 0x27D4EB2F));
+    h = mix32(h ^ Math.imul((sum + 1) | 0, 0x165667B1));
+
+    let a = h;
+    for (let i = 0; i < 4; i++) {
+        a = (a + 0x6D2B79F5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), a | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        t ^= t >>> 14;
+        _randBuf[i] = t >>> 0;
+    }
+
+    _quadBuf[0] = 0; _quadBuf[1] = 1; _quadBuf[2] = 2; _quadBuf[3] = 3;
+    let j = _randBuf[3] % 4, tmp;
+    tmp = _quadBuf[3]; _quadBuf[3] = _quadBuf[j]; _quadBuf[j] = tmp;
+    j = _randBuf[2] % 3;
+    tmp = _quadBuf[2]; _quadBuf[2] = _quadBuf[j]; _quadBuf[j] = tmp;
+    j = _randBuf[1] % 2;
+    tmp = _quadBuf[1]; _quadBuf[1] = _quadBuf[j]; _quadBuf[j] = tmp;
+
+    return _quadBuf;
+}
+
+function runOnePredict(period, sum, offset) {
+    const q = deriveQuad(offset, period, sum);
+    return {
+        killTypes: [TYPE_NAMES[q[0]], TYPE_NAMES[q[1]]],
+        keepTypes: [TYPE_NAMES[q[2]], TYPE_NAMES[q[3]]]
+    };
+}
+
+function predictFor(basePeriod, baseSum, offset) {
+    return runOnePredict(basePeriod, baseSum, offset);
+}
+
+function isHit(pred, actualSum) {
+    if (isSpecialHit(actualSum)) return true;
+    return !pred.killTypes.includes(sumToType(actualSum));
+}
+
+/* ============================================================
+ *  当前区间 & 状态标记
+ * ============================================================ */
+let currentOffset = 0;
+const RANGE_MAX = 810000;
+let lockSnapshot = null;
+let hasScanned = false;
+
+function getActiveOffset() {
+    return lockSnapshot ? lockSnapshot.offset : currentOffset;
+}
+
+function getNextPrediction() {
+    if (lockSnapshot) {
+        return {
+            killTypes: lockSnapshot.killTypes.slice(),
+            keepTypes: lockSnapshot.keepTypes.slice()
+        };
+    }
+    const last = draws[draws.length - 1];
+    return predictFor(last.period, last.sum, currentOffset);
+}
+
+/* ============================================================
+ *  数据源（接口未改动）
+ * ============================================================ */
+const API_URL = 'https://pc28.help/api/kj.json?nbr=50';
+
+let draws = [];
+let countdownSeconds = 0;
+
+async function fetchDraws() {
+    try {
+        const resp = await fetch(API_URL, { cache: 'no-store' });
+        const json = await resp.json();
+
+        if (json.message === 'success' && Array.isArray(json.data)) {
+            draws = json.data.map(item => ({
+                period: item.nbr,
+                balls: item.number.split('+').map(Number),
+                sum: parseInt(item.num, 10),
+                combination: item.combination,
+                date: item.date,
+                time: item.time
+            }));
+            draws.reverse();
+
+            if (json.countdown) {
+                const parts = String(json.countdown).split(':');
+                countdownSeconds = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+            }
+            return true;
+        }
+        return false;
+    } catch (e) {
+        console.error('API 请求失败', e);
+        return false;
+    }
+}
+
+/* ============================================================
+ *  渲染：预测
+ * ============================================================ */
+function renderPredict(pred) {
+    const keepVal0 = document.getElementById('keepVal0');
+    const keepVal1 = document.getElementById('keepVal1');
+    const banner   = document.getElementById('killBannerValue');
+
+    if (!pred) {
+        keepVal0.textContent = '--';
+        keepVal1.textContent = '--';
+        banner.textContent   = '--';
+        return;
+    }
+
+    keepVal0.textContent = pred.keepTypes[0] || '--';
+    keepVal1.textContent = pred.keepTypes[1] || '--';
+    banner.textContent   = pred.killTypes[0] || '--';
+}
+
+/* ============================================================
+ *  渲染：近30期回测
+ * ============================================================ */
+function renderHistory(records) {
+    const tbody  = document.getElementById('historyBody');
+    const rateEl = document.getElementById('historyRate');
+    if (!tbody) return;
+
+    if (!hasScanned) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-tertiary)">请先扫描 81 万区间</td></tr>`;
+        rateEl.textContent = '命中率 --';
+        return;
+    }
+
+    if (!records || records.length < 2) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-tertiary)">数据不足（至少需要 2 期）</td></tr>`;
+        rateEl.textContent = '命中率 --';
+        return;
+    }
+
+    const offset = getActiveOffset();
+    const recent = records.slice(-31);
+
+    const rows = [];
+    let hitCount = 0;
+    let total    = 0;
+
+    for (let i = 1; i < recent.length; i++) {
+        const base = recent[i - 1];
+        const act  = recent[i];
+
+        const pred = predictFor(base.period, base.sum, offset);
+        const ok   = isHit(pred, act.sum);
+
+        if (ok) hitCount++;
+        total++;
+
+        const actualText = `${act.balls.join('+')}=${act.sum} ${act.combination}`;
+        const statusHtml = ok
+            ? `<span class="correct">✅命中</span>`
+            : `<span class="wrong">☑️错误</span>`;
+
+        rows.push(`<tr>
+            <td>${act.period}</td>
+            <td>${pred.killTypes[0] || '--'}</td>
+            <td>${pred.keepTypes.join(' / ')}</td>
+            <td>${actualText} ${statusHtml}</td>
+        </tr>`);
+    }
+
+    tbody.innerHTML = rows.reverse().join('');
+
+    const rate = total ? ((hitCount / total) * 100).toFixed(1) + '%' : '--';
+    rateEl.textContent = `命中率 ${rate}（${hitCount}/${total}）`;
+}
+
+/* ============================================================
+ *  渲染：开奖信息
+ * ============================================================ */
+function renderHeroDraw() {
+    if (!draws.length) return;
+    const last = draws[draws.length - 1];
+    document.getElementById('heroPeriod').textContent = `第 ${last.period} 期`;
+    const ballsEl = document.getElementById('heroBalls');
+    ballsEl.innerHTML = last.balls.map(b => `<div class="ball">${b}</div>`).join('');
+    document.getElementById('heroSum').textContent = `和值：${last.sum} · ${last.combination}`;
+    document.getElementById('statusPeriod').textContent = last.period;
+    document.getElementById('statusSum').textContent = last.sum;
+    document.getElementById('statusActual').textContent = last.combination;
+}
+
+/* ============================================================
+ *  统一刷新
+ * ============================================================ */
+function refreshUI() {
+    if (!draws.length) return;
+
+    if (!hasScanned) {
+        renderPredict(null);
+        const hitEl = document.getElementById('statusHit');
+        hitEl.textContent = '--';
+        hitEl.style.color = '';
+        renderHistory(draws);
+        return;
+    }
+
+    renderPredict(getNextPrediction());
+
+    const hitEl = document.getElementById('statusHit');
+    if (draws.length >= 2) {
+        const base = draws[draws.length - 2];
+        const act  = draws[draws.length - 1];
+        const ok = isHit(predictFor(base.period, base.sum, getActiveOffset()), act.sum);
+        hitEl.textContent = ok ? '✅命中' : '☑️错误';
+        hitEl.style.color = ok ? 'var(--success)' : 'var(--error)';
+    } else {
+        hitEl.textContent = '--';
+        hitEl.style.color = '';
+    }
+
+    renderHistory(draws);
+}
+
+/* ============================================================
+ *  按钮事件
+ * ============================================================ */
+const btnLock = document.getElementById('btnLock');
+
+function setLockUI(locked) {
+    btnLock.textContent = locked ? '解锁区间' : '锁定区间';
+    btnLock.classList.toggle('is-locked', locked);
+}
+
+document.getElementById('btnGenerate').addEventListener('click', async () => {
+    if (isScanning) {
+        showToast('扫描中，请稍候');
+        return;
+    }
+    if (!hasScanned) {
+        showToast('请先扫描 81 万区间');
+        return;
+    }
+    const ok = await fetchDraws();
+    if (ok) {
+        renderHeroDraw();
+        refreshUI();
+        updateCountdown();
+        showToast(lockSnapshot ? '数据已刷新（预测已锁定，保持不变）' : '已刷新数据');
+    } else {
+        showToast('数据刷新失败，请重试');
+    }
+});
+
+btnLock.addEventListener('click', () => {
+    if (!hasScanned) {
+        showToast('请先扫描 81 万区间');
+        return;
+    }
+    if (isScanning) {
+        showToast('扫描中，请稍候');
+        return;
+    }
+
+    if (lockSnapshot) {
+        lockSnapshot = null;
+        setLockUI(false);
+        showToast('已解锁，预测将随数据刷新');
+    } else {
+        const last = draws[draws.length - 1];
+        const pred = predictFor(last.period, last.sum, currentOffset);
+        lockSnapshot = {
+            offset: currentOffset,
+            basePeriod: last.period,
+            baseSum: last.sum,
+            killTypes: pred.killTypes.slice(),
+            keepTypes: pred.keepTypes.slice()
+        };
+        setLockUI(true);
+        showToast(`已锁定区间 ${currentOffset.toLocaleString()}，预测已冻结`);
+    }
+
+    refreshUI();
+});
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+/* ============================================================
+ *  星空 Canvas 背景
+ * ============================================================ */
+(function starfield() {
+    const cv = document.getElementById('starCanvas');
+    const ctx = cv.getContext('2d');
+    let stars = [];
+    function resize() {
+        cv.width = window.innerWidth;
+        cv.height = window.innerHeight;
+        const count = Math.floor((cv.width * cv.height) / 12000);
+        stars = Array.from({ length: count }, () => ({
+            x: Math.random() * cv.width,
+            y: Math.random() * cv.height,
+            r: Math.random() * 1.0 + 0.2,
+            a: Math.random() * 0.5 + 0.15,
+            da: (Math.random() - 0.5) * 0.01
+        }));
+    }
+    function draw() {
+        ctx.clearRect(0, 0, cv.width, cv.height);
+        for (const s of stars) {
+            s.a += s.da;
+            if (s.a < 0.1 || s.a > 0.7) s.da *= -1;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(100,170,240,${s.a})`;
+            ctx.fill();
+        }
+        requestAnimationFrame(draw);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+    draw();
+})();
+
+/* ============================================================
+ *  倒计时
+ * ============================================================ */
+function updateCountdown() {
+    if (countdownSeconds > 0) countdownSeconds--;
+    const sec = Math.max(0, countdownSeconds);
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    document.getElementById('heroCountdown').textContent =
+        `距下期开奖 ${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+/* ============================================================
+ *  扫描后自动刷新
+ * ============================================================ */
+async function autoRefreshAfterScan() {
+    const prevPeriod = draws.length ? draws[draws.length - 1].period : null;
+    const savedText  = scanStatus.textContent;
+
+    scanStatus.textContent = '🔄 正在同步最新开奖…';
+
+    let ok = false;
+    try { ok = await fetchDraws(); } catch (e) { ok = false; }
+
+    if (!ok) {
+        scanStatus.textContent = savedText + '  ⚠️ 最新数据同步失败，扫描结果仍有效';
+        showToast('最新开奖同步失败，可手动点「刷新预测」');
+        return false;
+    }
+
+    renderHeroDraw();
+    refreshUI();
+    updateCountdown();
+
+    const cur = draws.length ? draws[draws.length - 1].period : null;
+    if (prevPeriod && cur && cur !== prevPeriod) {
+        scanStatus.textContent = `✅ 已同步最新第 ${cur} 期 · 预测已自动更新`;
+        showToast(`新期 ${cur} 已开出，预测已刷新`);
+    } else {
+        scanStatus.textContent = '✅ 已同步最新数据（本期尚未开奖）';
+        showToast('已同步最新数据');
+    }
+    return true;
+}
+
+/* ============================================================
+ *  全区间扫描（81 万）
+ * ============================================================ */
+const SCAN_TOTAL = RANGE_MAX;
+const SCAN_CHUNK = 3000;
+let isScanning = false;
+
+const scanBtn      = document.getElementById('btnScan');
+const scanProgress = document.getElementById('scanProgress');
+const scanStatus   = document.getElementById('scanStatus');
+const scanResults  = document.getElementById('scanResults');
+const scanTip      = document.getElementById('scanTip');
+const scanRangeLabel = document.getElementById('scanRangeLabel');
+const scanToggle   = document.getElementById('scanToggle');
+const scanList     = document.getElementById('scanList');
+
+scanRangeLabel.textContent = `0 ~ ${(SCAN_TOTAL - 1).toLocaleString()}`;
+
+let scanListCollapsed = false;
+scanToggle.addEventListener('click', () => {
+    scanListCollapsed = !scanListCollapsed;
+    scanList.classList.toggle('collapsed', scanListCollapsed);
+    scanToggle.classList.toggle('collapsed', scanListCollapsed);
+    scanToggle.querySelector('span:first-child').textContent =
+        scanListCollapsed ? '🏆 TOP 5 最优区间（已收起）' : '🏆 TOP 5 最优区间';
+});
+
+async function scanAllOffsets() {
+    if (isScanning) return;
+    if (draws.length < 2) {
+        showToast('数据加载中，请稍候');
+        return;
+    }
+
+    isScanning = true;
+    lockSnapshot = null;
+    setLockUI(false);
+
+    scanBtn.disabled = true;
+    scanBtn.textContent = '⏳ 扫描中...';
+    scanProgress.style.width = '0%';
+    scanResults.classList.remove('show');
+    scanTip.style.display = 'none';
+    scanStatus.textContent = '正在准备数据...';
+
+    scanListCollapsed = false;
+    scanList.classList.remove('collapsed');
+    scanToggle.classList.remove('collapsed');
+    scanToggle.querySelector('span:first-child').textContent = '🏆 TOP 5 最优区间';
+
+    const recent = draws.slice(-31);
+    const N = recent.length - 1;
+
+    const basePeriods = new Int32Array(N);
+    const baseSums    = new Uint8Array(N);
+    const actualTypes = new Int8Array(N);
+    const special     = new Uint8Array(N);
+
+    for (let i = 0; i < N; i++) {
+        const base = recent[i];
+        const act  = recent[i + 1];
+        basePeriods[i] = base.period | 0;
+        baseSums[i]    = base.sum;
+        actualTypes[i] = sumToTypeIndex(act.sum);
+        special[i]     = isSpecialHit(act.sum) ? 1 : 0;
+    }
+
+    const topOffsets = new Int32Array(5).fill(-1);
+    const topHits    = new Int32Array(5).fill(-1);
+
+    let checkedCount = 0;
+    const t0 = performance.now();
+
+    for (let start = 0; start < SCAN_TOTAL; start += SCAN_CHUNK) {
+        const end = Math.min(start + SCAN_CHUNK, SCAN_TOTAL);
+
+        for (let offset = start; offset < end; offset++) {
+            checkedCount++;
+
+            let hits = 0;
+            for (let i = 0; i < N; i++) {
+                if (special[i]) { hits++; continue; }
+                const q = deriveQuad(offset, basePeriods[i], baseSums[i]);
+                const a = actualTypes[i];
+                if (q[0] !== a && q[1] !== a) hits++;
+            }
+
+            if (hits > topHits[4]) {
+                let p = 4;
+                while (p > 0 && topHits[p - 1] < hits) {
+                    topHits[p] = topHits[p - 1];
+                    topOffsets[p] = topOffsets[p - 1];
+                    p--;
+                }
+                topHits[p] = hits;
+                topOffsets[p] = offset;
+            }
+        }
+
+        const pct = end / SCAN_TOTAL * 100;
+        scanProgress.style.width = pct.toFixed(2) + '%';
+        const elapsed = (performance.now() - t0) / 1000;
+        const speed = end / Math.max(elapsed, 0.001);
+        const eta = Math.max(0, (SCAN_TOTAL - end) / speed);
+
+        scanStatus.textContent =
+            `已扫描 ${checkedCount.toLocaleString()} / ${SCAN_TOTAL.toLocaleString()} 个区间 · ` +
+            `${pct.toFixed(1)}% · 剩余约 ${Math.ceil(eta)}s`;
+
+        await new Promise(r => setTimeout(r, 0));
+    }
+
+    isScanning = false;
+    scanBtn.disabled = false;
+    scanBtn.textContent = '🔍 重新扫描 81 万区间';
+
+    const totalSec = ((performance.now() - t0) / 1000).toFixed(1);
+
+    if (checkedCount === SCAN_TOTAL) {
+        scanStatus.textContent =
+            `✅ 扫描完成 · 已检查全部 ${checkedCount.toLocaleString()} 个区间 · 无遗漏 · 用时 ${totalSec}s`;
+    } else {
+        scanStatus.textContent =
+            `⚠️ 扫描异常 · 已检查 ${checkedCount.toLocaleString()} / ${SCAN_TOTAL.toLocaleString()} · 请重新扫描`;
+    }
+
+    renderScanResults(topOffsets, topHits, N);
+
+    if (topOffsets[0] >= 0) {
+        hasScanned = true;
+        currentOffset = topOffsets[0];
+        lockSnapshot = null;
+        setLockUI(false);
+
+        const firstItem = scanList.querySelector('.scan-result-item');
+        if (firstItem) firstItem.classList.add('active');
+
+        showToast(`已自动应用最优区间 ${topOffsets[0].toLocaleString()}，正在同步最新开奖…`);
+    }
+
+    await autoRefreshAfterScan();
+
+    if (typeof setEnterReady === 'function') setEnterReady();
+}
+
+function renderScanResults(offsets, hits, N) {
+    let html = '';
+
+    for (let i = 0; i < 5; i++) {
+        const off = offsets[i];
+        if (off < 0) continue;
+        const rate = (hits[i] / N * 100).toFixed(1);
+        const cls = i === 0 ? 'top1' : '';
+        html += `<div class="scan-result-item ${cls}" data-offset="${off}">
+            <div class="scan-rank">${i + 1}</div>
+            <div class="scan-offset">区间 ${off.toLocaleString()}</div>
+            <div class="scan-hits">${hits[i]}/${N} <small>(${rate}%)</small></div>
+        </div>`;
+    }
+
+    scanList.innerHTML = html;
+    scanResults.classList.add('show');
+    scanTip.style.display = 'block';
+
+    scanList.querySelectorAll('.scan-result-item').forEach(el => {
+        el.addEventListener('click', () => {
+            if (!hasScanned) return;
+            if (lockSnapshot) {
+                showToast('区间已锁定，请先解锁');
+                return;
+            }
+
+            const off = parseInt(el.dataset.offset, 10);
+            currentOffset = off;
+
+            scanList.querySelectorAll('.scan-result-item').forEach(x => x.classList.remove('active'));
+            el.classList.add('active');
+
+            refreshUI();
+            showToast(`已应用区间 ${off.toLocaleString()}`);
+        });
+    });
+}
+
+scanBtn.addEventListener('click', scanAllOffsets);
+
+/* ============================================================
+ *  初始化
+ * ============================================================ */
+(async function init() {
+    advanceSplash(1);
+
+    const ok = await fetchDraws();
+    if (ok) {
+        renderHeroDraw();
+        refreshUI();
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        setInterval(async () => {
+            if (isScanning) return;
+            const prev = draws.length ? draws[draws.length - 1].period : null;
+            const refreshed = await fetchDraws();
+            if (refreshed) {
+                renderHeroDraw();
+                refreshUI();
+                const cur = draws[draws.length - 1].period;
+                if (prev && cur !== prev) {
+                    updateCountdown();
+                    showToast(`第 ${cur} 期已开出 · 预测已更新`);
+                }
+            }
+        }, 30000);
+
+        advanceSplash(2);
+    } else {
+        showToast('数据加载失败，请刷新重试');
+        document.getElementById('historyBody').innerHTML =
+            `<tr><td colspan="4" style="text-align:center;color:var(--error)">数据加载失败</td></tr>`;
+    }
+
+    armPasswordGate();
+
+    setTimeout(function(){
+        if (pwdPanel.style.display !== 'flex') return;
+        paintDots();
+    }, 3000);
+})();
+
+window.addEventListener('beforeunload', function(){
+    if (splashStepTimer) clearInterval(splashStepTimer);
+    if (lockTimer) clearInterval(lockTimer);
+});
+</script>
+
+</body>
+</html>
